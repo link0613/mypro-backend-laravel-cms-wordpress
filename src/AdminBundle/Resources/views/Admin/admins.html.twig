@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    <div class="col-xs-4">
+                        <a href="{{ path('add_admins') }}" class="btn btn-success"><i class="fa fa-plus"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="box">
+                <div class="box-body">
+                    <table id="example1" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Full name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Assigned users</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for admin in admins %}
+                            <tr>
+                                <td>{{ admin.fullName }}</td>
+                                <td><a href="{{ path('view_admin', {'admin': admin.id}) }}">{{ admin.email }}</a></td>
+                                <td>
+                                    {% if admin.isSuperAdmin %}
+                                        SUPER_ADMIN
+                                    {% elseif admin.role == 'ROLE_ADMIN_MANAGER' %}
+                                        MANAGER
+                                    {% elseif admin.role == 'ROLE_MANAGER_BLOG' %}
+                                        BlOG MANAGER
+                                    {% else %}
+                                        ADMIN
+                                    {% endif %}</td>
+                                <td>{{ admin.users | length }}</td>
+                                <td class="text-center">{% if not admin.isSuperAdmin %}<a class="btn btn-danger btn-sm" href="{{ path('delete_admin', {'admin': admin.id}) }}"><i class="fa fa-trash"></i></a>{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

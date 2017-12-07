@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Add/Edit admin{% endblock %}
+{% block sub_small_title %}{% endblock %}
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-user"></i> Admin</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <div class="form-group col-sm-6">
+                        <div>{{ form_row(form.full_name) }}</div>
+                        <div>{{ form_row(form.email) }}</div>
+                        {% if form.password is defined %}
+                        <div>{{ form_row(form.password) }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-sm-6">
+                        {{ form_row(form.role) }}
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

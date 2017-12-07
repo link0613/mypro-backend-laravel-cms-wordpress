@@ -1,0 +1,118 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Users{% endblock %}
+{% block sub_small_title %}List of all users{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-user"></i> Users</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box">
+                <div class="box-body">
+                    {% if pages > 1 %}
+                        {% include '@Admin/Admin/pagination.html.twig' with {'route': 'list_users'} %}
+                    {% endif %}
+            {% if users[0] is defined %}
+                <table class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        {% if not app.user.isSuperAdmin %}
+                            <th class="col-md-2">Fullname</th>
+                            <th class="col-md-2">Email</th>
+                            <th class="col-md-6">Services</th>
+                            <th class="col-md-2">Price</th>
+                        {% else %}
+                            <th class="col-md-2">Fullname</th>
+                            <th class="col-md-2">Email</th>
+                            <th class="col-md-5">Services</th>
+                            <th class="col-md-1">Price</th>
+                            <th class="col-md-2">Assigned to</th>
+                            <th class="col-md-2">Action</th>
+                        {% endif %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for user in users %}
+                        {% set price = 0 %}
+                        <tr>
+                            <td>{{ user.fullName }}</td>
+                            <td><a href="{{ path('view_user', {'user': user.id}) }}">{{ user.email }}</a></td>
+                            <td>
+                                {% set num_packages = user.packages | length %}
+
+                                {% if num_packages != 0 %}
+                                    {% if num_packages > 1 %}
+                                        {% set packages = [] %}
+
+                                        {% for package in user.packages %}
+                                            {% set packages = packages|merge([package.service.name]) %}
+                                        {% endfor %}
+
+                                        {% if user.packages.first.discount %}
+                                            {% set price = price + user.packages.first.discount %}
+                                        {% else %}
+                                            {% set price = price + user.packages.first.price %}
+                                        {% endif %}
+
+                                        {{ packages | join(', ') }}
+                                    {% else %}
+                                        {{ user.packages.first.service.name }}
+                                        {% if user.packages.first.discount %}
+                                            {% set price = price + user.packages.first.discount %}
+                                        {% else %}
+                                            {% set price = price + user.packages.first.price %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% else %}
+                                    No services
+                                {% endif %}
+                            </td>
+                            <td>${{ price }}</td>
+                            {% if app.user.isSuperAdmin %}
+                                <td>
+                                    <select id="{{ user.id }}" class="form-control change-user-owner">
+                                        {% for admin in admins %}
+                                            <option value="{{ admin.id }}" {% if admin == user.admin %} selected {% endif %}>{{ admin.fullName }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-danger btn-sm" href="{{path('delete_user', {'user': user.id})}}"><i class="fa fa-trash"></i></a>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                No users assigned to you.
+            {% endif %}
+                    {% if pages > 1 %}
+                        {% include '@Admin/Admin/pagination.html.twig' with {'route': 'list_users'} %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        $(document).on('change', '.change-user-owner', function() {
+            var admin = $(this).val();
+            var user = $(this).attr('id');
+
+            $.ajax({
+                url:  "{{ path('admin_user_assign_to_admin') }}",
+                type: "POST",
+                data: {user: user, admin: admin},
+                success:function(data) {
+                    getSuccessNoty('User was assigned successfully');
+                }
+            });
+        });
+    </script>
+{% endblock %}

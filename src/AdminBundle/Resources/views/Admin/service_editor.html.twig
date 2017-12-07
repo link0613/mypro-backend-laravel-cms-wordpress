@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}Services{% endblock %}
+{% block sub_small_title %}Edit service{% endblock %}
+
+{% block breadcrumb %}
+    <li class="active"><i class="fa fa-money"></i> Service</li>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                {{ form_start(form) }}
+                <div class="box-body">
+                    <div class="form-group">
+                        <div class="col-sm-6">{{ form_row(form.name) }}</div>
+                        {% if premium %}
+                        <div class="col-sm-6">{{ form_row(form.priceSenior, {'label': 'Cost (%)'}) }}</div>
+                        {% else %}
+                        <div class="col-sm-6">{{ form_row(form.priceSenior) }}</div>
+                        {% endif %}
+                        <div class="col-sm-6">{{ form_row(form.description) }}</div>
+                        {% if not premium %}
+                        <div class="col-sm-6">{{ form_row(form.priceExecutive) }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="box-footer">
+                    {{ form_widget(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,100 @@
+/* - - - - - - - - - - - - chat - - - - - - - - - - - - */
+.chat {
+    max-width: 790px;
+    margin: 0;
+    position: relative;
+}
+.chat-messages {
+    margin-bottom: 35px;
+    padding: 0 5px;
+    max-height: 250px;
+}
+
+/* - - - sms-recipient % sms-sender - - - */
+.media-body {
+    display: inline-block;
+    position: relative;
+    width: auto;
+    max-width: 280px;
+    padding: 10px 15px;
+    overflow: initial;
+    border-radius: 5px;
+    word-break: break-word;
+    font: 14px/1.4 Arial, sans-serif;
+    text-align: left;
+}
+time {
+    margin: 0 -15px;
+}
+time span:first-child {
+    padding-right: 10px;
+}
+
+.media-body:before {
+    left: 100%;
+    top: calc(50% - 5px);
+    content: '';
+    width: 0;
+    height: 0;
+    position: absolute;
+    border-style: solid;
+    border-width: 5px;
+}
+
+/* sms-recipient */
+.sms-recipient {
+    display: flex;
+    align-items: flex-start;
+}
+
+.sms-recipient .media-body {
+    background: #fff;
+    border: 1px solid #08618d;
+}
+
+.sms-recipient .media-body>a {
+    color: #333;
+}
+
+.sms-recipient .media-body:before {
+    border-color: transparent #08618d transparent transparent;
+    left: auto;
+    right: 100%;
+}
+
+/* sms-sender */
+.sms-sender {
+    display: flex;
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.sms-sender .media-body {
+    background: #08618d;
+    color: #fff;
+}
+
+.sms-sender time {
+    float: right;
+}
+
+.sms-sender .media-body:before {
+    border-color: transparent transparent transparent #08618d;
+}
+
+.media-body>a {
+    color: white;
+    text-decoration: underline;
+}
+
+.chat-messages>.message-group {
+    margin-top: 15px;
+}
+
+.chat-messages>.message-group>.message-group-date {
+    text-align: center;
+}
+
+#direct-chat-message {
+    resize: vertical;
+}

@@ -1,0 +1,232 @@
+{% extends 'base.html.twig' %}
+
+{% block sub_title %}{{ user.fullName }} Jobs{% endblock %}
+{% block sub_small_title %}{% endblock %}
+
+{% block breadcrumb %}
+    <li><a href="{{ path('view_user', {'user': user.id}) }}"><i class="fa fa-list"></i> User</a></li>
+    <li class="active"><i class="fa fa-briefcase"></i> Jobs</li>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/normalize.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/admin/plugins/CustomFileInputs/css/component.css') }}">
+    <style>
+     .inputfile {
+         width: 0.1px;
+         height: 0.1px;
+         opacity: 0;
+         overflow: hidden;
+         position: absolute;
+         z-index: -1;
+     }
+     .post {
+         position: relative;
+        }
+     .delete-job {
+         position: absolute;
+         top: -15px;
+         right: 10px;
+         cursor: pointer;
+     }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="row custom-content">
+    {% for flash_message in app.session.flashBag.get('error') %}
+        <div class="alert alert-danger form-group">
+            {{ flash_message }}
+        </div>
+    {% endfor %}
+        <div class="col-md-12">
+            <a class="btn btn-primary" href="{{ path('view_user', {'user': user.id}) }}">Profile</a>
+        </div>
+        <hr>
+        <div class="col-md-12">
+        <div class="nav-tabs-custom panel box box-primary">
+            <ul class="nav nav-tabs pull-right">
+                <li><a href="#tab_2-2" data-toggle="tab">Applied</a></li>
+                <li class="active"><a href="#tab_1-1" data-toggle="tab">Liked</a></li>
+                <li>
+                    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal-default">
+                        Add Job
+                    </button>
+                </li>
+                <li class="pull-left header"><i class="fa fa-check-square-o"></i> Jobs</li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab_1-1">
+                    <div class="col-xs-offset-4 col-xs-4 col-xs-offset-4 text-center">
+                        <select class="form-control job-like-filter">
+                            <option value="">All</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Ready">Ready</option>
+                            <option value="Need Info">Need Info</option>
+                        </select>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr>
+                    <div class="liked-jobs-div">
+                    {% for job in jobs_liked %}
+                        {% set logo_url = job.link|split('/') %}
+                        <div class="post" data-sort="{{ job.date | date("M d,Y") }}">
+                            <div class="row">
+                                <div class="user-block col-md-4 col-xs-6">
+                                    <a href="{{ job.link }}" target="_blank">
+                                        <img class="img-circle img-bordered-sm" onError="this.onerror=null;this.src='//logo.clearbit.com/https://www.findmyprofession.com/';" src="//logo.clearbit.com/{{ logo_url[0] ~ "//" ~ logo_url[2]}}" alt="user image">
+                                        <span class="username">{{ job.position }}</span>
+                                        <span class="description">{{ job.company }}</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-3 col-xs-6 upload-section">
+                                {% if job.attachmentName %}
+                                    <label style="padding: 0.625rem 1.25rem;">
+                                        <span>
+                                            <a href="{{ path('user_get_cover_letter', {'job': job.id}) }}">{{ job.attachmentAlias }}</a>
+                                            <a href="#" data-id="{{ job.id }}" data-href="{{ path('user_remove_cover_letter', {'job': job.id}) }}" data-href-add="{{ path('user_add_cover_letter', {'job': job.id}) }}" class="remove-cover-letter"><i class="fa fa-close"></i></a>
+                                        </span>
+                                    </label>
+                                {% else %}
+                                    <input type="file" id="coverLatter{{ job.id }}" class="inputfile inputfile-3" accept=".pdf, .doc, .docx, .rtf, .txt, .jpg, .jpeg, .png, .svg, .ico, .gif" data-href="{{ path('user_add_cover_letter', {'job': job.id}) }}" />
+                                    <label for="coverLatter{{ job.id }}"><span>Upload Cover Letter</span></label>
+                                {% endif %}
+                                </div>
+                                <div class="col-md-2 col-xs-12">
+                                    <select id="{{ job.id }}" class="form-control change-job-status" data-url="{{ path('change_job_status') }}">
+                                        <option {% if job.status == 'Pending' %} selected {% endif %} value="Pending">Pending</option>
+                                        <option {% if job.status == 'Applied' %} selected {% endif %}  value="Applied">Applied</option>
+                                        <option {% if job.status == 'Ready' %} selected {% endif %}  value="Ready">Ready</option>
+                                        <option {% if job.status == 'Need Info' %} selected {% endif %}  value="Need Info">Need Info</option>
+                                        <option {% if job.status == 'Not Interested' %} selected {% endif %}  disabled value="Not Interested">Not Interested</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 col-xs-12">
+                                    <span class="description job-date">{% if job.addedBy == 'user' %}You{% else %}FMP{% endif %} {{ job.section }}: {{ job.date | date("M d,Y") }}</span>
+                                    <div class="description">
+                                        <label>
+                                            <input type="checkbox" {% if job.checked %} checked {% endif %} disabled> Yes, Apply For Me
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <a href="{{path('admin_delete_job', {job: job.id})}}">
+                              <span class="delete-job">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                              </span>
+                            </a>
+                        </div>
+                        {% else %}
+                        <div class="empty-liked">
+                            <p align="center">First you need to add a job</p>
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+                <div class="tab-pane" id="tab_2-2">
+                    <div class="col-xs-offset-4 col-xs-4 col-xs-offset-4 text-center">
+                        <select class="form-control job-apply-filter">
+                            <option value="">All</option>
+                            <option value="Applied">Applied</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Offer">Offer</option>
+                        </select>
+                    </div>
+                    <div class="clearfix"></div>
+                    <hr>
+                    <div class="applied-jobs-div">
+                    {% for job in jobs_applied %}
+                        {% set logo_url = job.link|split('/') %}
+                        <div class="post" data-sort="{{ job.date | date("M d,Y") }}">
+                            <div class="row">
+                                <div class="user-block col-md-4 col-xs-6">
+                                    <a href="{{ job.link }}" target="_blank">
+                                        <img class="img-circle img-bordered-sm" onError="this.onerror=null;this.src='//logo.clearbit.com/https://www.findmyprofession.com/';" src="//logo.clearbit.com/{{ logo_url[0] ~ "//" ~ logo_url[2]}}" alt="user image">
+                                        <span class="username">{{ job.position }}</span>
+                                        <span class="description">{{ job.company }}</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-3 col-xs-6 upload-section">
+                                    {% if job.attachmentName %}
+                                    <label style="padding: 0.625rem 1.25rem;">
+                                        <span>
+                                        <a href="{{ path('user_get_cover_letter', {'job': job.id}) }}">{{ job.attachmentAlias }}</a>
+                                        <a href="#" data-id="{{ job.id }}" data-href="{{ path('user_remove_cover_letter', {'job': job.id}) }}" data-href-add="{{ path('user_add_cover_letter', {'job': job.id}) }}" class="remove-cover-letter"><i class="fa fa-close"></i></a>
+                                        </span>
+                                    </label>
+                                {% else %}
+                                    <input type="file" id="coverLatter{{ job.id }}" class="inputfile inputfile-3" accept=".pdf, .doc, .docx, .rtf, .txt, .jpg, .jpeg, .png" data-href="{{ path('user_add_cover_letter', {'job': job.id}) }}" />
+                                    <label for="coverLatter{{ job.id }}"><span>Upload Cover Letter</span></label>
+                                {% endif %}
+                                </div>
+                                <div class="col-md-2 col-xs-12">
+                                    <select id="{{ job.id }}" class="form-control change-job-status" data-url="{{ path('change_job_status') }}">
+                                        <option {% if job.status == 'Pending' %} selected {% endif %} value="Pending">Pending</option>
+                                        <option {% if job.status == 'Applied' %} selected {% endif %}  value="Applied">Applied</option>
+                                        <option {% if job.status == 'Interview' %} selected {% endif %}  value="Interview">Interview</option>
+                                        <option {% if job.status == 'Offer' %} selected {% endif %}  value="Offer">Offer</option>
+                                        <option {% if job.status == 'Rejected' %} selected {% endif %}  value="Rejected">Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 col-xs-12">
+                                  <span class="description">{% if job.addedBy == 'admin' %}FMP{% endif %} {{ job.section|capitalize }}:
+                                    {% if job.appliedDate %}
+                                      {{ job.appliedDate | date("M d, Y") }}
+                                    {% else %}
+                                      {{ job.date | date("M d, Y") }}
+                                    {% endif %}
+                                  </span>
+                                    <div class="description">
+                                        <label>
+                                            <input type="checkbox" {% if job.checked %} checked {% endif %} disabled> Yes, Apply For Me
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="{{path('admin_delete_job', {job: job.id})}}">
+                              <span class="delete-job">
+                                <i class="fa fa-times" aria-hidden="true"></i>
+                              </span>
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="empty-applied" align="center">No Applied Jobs</p>
+                    {% endfor %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-default" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">Add Job <small>Please Add Job Detail</small></h4>
+                </div>
+                {{ form_start(form, {'action': path('add_user_job', {'user': user.id})}) }}
+                <div class="modal-body">
+                    {{ form_row(form.link) }}
+                    {{ form_row(form.company) }}
+                    {{ form_row(form.position) }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                    {{ form_row(form.submit) }}
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('bundles/admin/plugins/CustomFileInputs/js/custom-file-input.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+    <script src="{{ asset('bundles/admin/js/jobs.js') }}"></script>
+{% endblock %}
